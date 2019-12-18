@@ -121,15 +121,18 @@ export default class Game extends React.Component {
     constructor(props) {
         super(props);
         //mantem o estado das jogadas em um historico
+        //aqui entra o conceito de controle dos componentes por um componente pai.
         this.state = {
             history: [{
                 squares: Array(9).fill(null),
             }],
-            xIsNext: true
+            xIsNext: true,
+            stepNumber: 0
         };
     }
 
     handleClick(i) {
+        /*
         const history = this.state.history;
         const current = history[history.length - 1];
         const squares = current.squares.slice();
@@ -141,13 +144,38 @@ export default class Game extends React.Component {
             history: history.concat([{
                 squares: squares,
             }]),
+            xIsNext: !this.state.xIsNext
+        });*/
+
+        const history = this.state.history.slice(0, this.state.stepNumber + 1);
+        const current = history[history.length - 1];
+        const squares = current.squares.slice();
+        if (calculateWinner(squares) || squares[i]) {
+            return;
+        }
+        squares[i] = this.state.xIsNext ? 'X' : 'O';
+        this.setState({
+            history: history.concat([{
+                squares: squares
+            }]),
+            stepNumber: history.length,
             xIsNext: !this.state.xIsNext,
+        });
+
+    }
+
+    jumpTo(step) {
+        //faz a atualização do estado do componente, este estado afeta
+        //todo o método render
+        this.setState({
+            stepNumber: step,
+            xIsNext: (step % 2) === 0,
         });
     }
 
     render() {
         const history = this.state.history;
-        const current = history[history.length - 1];
+        const current = history[this.state.stepNumber];
         const winner = calculateWinner(current.squares);
 
         //o histórico foi remapeado para exibir em forma de movimentos
